@@ -18,9 +18,6 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Siapkan Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Pasang Android SDK Platform dan Build Tools
         run: |
           yes | sdkmanager --licenses
