@@ -1,0 +1,54 @@
+
+name: Buat APK BELI SAWIT
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "*.zip"
+      - ".github/workflows/main.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ambil file proyek
+        uses: actions/checkout@v4
+
+      - name: Siapkan Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Siapkan Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Ekstrak proyek
+        run: |
+          mkdir project
+          unzip -q "$(find . -maxdepth 1 -name '*.zip' | head -n 1)" -d project
+          PROJECT_FILE=$(find project -name settings.gradle -o -name settings.gradle.kts | head -n 1)
+          if [ -z "$PROJECT_FILE" ]; then
+            echo "File proyek Android tidak ditemukan"
+            exit 1
+          fi
+          echo "PROJECT_DIR=$(dirname "$PROJECT_FILE")" >> "$GITHUB_ENV"
+
+      - name: Pasang Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Bangun APK
+        run: |
+          cd "$PROJECT_DIR"
+          gradle assembleDebug
+
+      - name: Simpan APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BELI-SAWIT-APK
+          path: project/**/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
