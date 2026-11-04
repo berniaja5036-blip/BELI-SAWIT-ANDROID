@@ -20,8 +20,13 @@ jobs:
 
       - name: Pasang Android SDK Platform dan Build Tools
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          SDKMANAGER="$(find /usr/local/lib/android/sdk/cmdline-tools -type f -name sdkmanager | head -n 1)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "Android SDK command-line tools tidak ditemukan"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Siapkan Gradle
         uses: gradle/actions/setup-gradle@v4
